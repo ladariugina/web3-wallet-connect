@@ -4,8 +4,8 @@
 </template>
 
 <script lang="ts">
-import WalletConnect from './components/WalletConnect.vue';
-import MetaMaskConnect from './components/MetaMaskConnect.vue';
+import WalletConnect from './layouts/WalletConnect.vue';
+import MetaMaskConnect from './layouts/MetaMaskConnect.vue';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
