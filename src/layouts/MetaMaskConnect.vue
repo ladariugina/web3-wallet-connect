@@ -8,75 +8,71 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref, reactive, onMounted } from "vue";
 import CardConnect from "@/components/card-connect.vue";
 
 import Web3 from "web3";
 
-import { Wallet, CustomWindow } from "@/types/index";
+import { CustomWindow } from "@/types/index";
+import type { Ref } from "vue";
 declare let window: CustomWindow;
 
 export default defineComponent({
   components: { CardConnect },
 
-  data(): Wallet {
-    return {
-      account: "",
-      errorMessage: "",
-      provider: null,
-      web3: new Web3(
-        Web3.givenProvider || "ws://some.local-or-remote.node:8546"
-      ),
-      walletOptions: {
-        name: "MetaMask",
-        logo: "/img/metamask.svg",
-      }
-    }
-  },
-  
-  computed: {
-    isAccountConnect(): boolean {
-      return !!this.account;
-    }
-  },
+  setup() {
+    const account: Ref<string> = ref("");
+    const errorMessage: Ref<string> = ref("");
+    const web3: Web3 = new Web3 (
+      Web3.givenProvider || "ws://some.local-or-remote.node:8546"
+    );
+    const walletOptions: { name: string, logo: string } = reactive({
+      name: "MetaMask",
+      logo: "/img/metamask.svg",
+    });
 
-  mounted() {
-    this.getAccounts();
-    this.subscribeToEvents();
-  },
+    onMounted(() => {
+      getAccounts();
+      subscribeToEvents();
+    });
 
-  methods: {
-    async onConnectWallet(): Promise<void> {
+    const subscribeToEvents = (): void => {
+      window.ethereum.on("accountsChanged", accountChangeHandler);
+    };
+
+    const onConnectWallet = async (): Promise<void> => {
       try{
         if (window.ethereum) {
-          this.provider = window.ethereum;
           await window.ethereum.request({
             method: "eth_requestAccounts",
           });
-        } else this.errorMessage = "Please install MetaMask!";
+        } else errorMessage.value = "Please install MetaMask!";
       }
       catch(error: any) {
-        this.errorMessage = error.message;
+        errorMessage.value = error.message;
       }
-    },
+    };
 
-    async getAccounts() {
+    const accountChangeHandler = (accounts: string[]): void => {
+      account.value = accounts[0];
+      errorMessage.value = "";
+    };
+
+    const getAccounts = async (): Promise<void> => {
       try{
-        const accounts = await this.web3.eth.getAccounts();
-        if (accounts.length) this.accountChangeHandler(accounts);
+        const accounts = await web3.eth.getAccounts();
+        if (accounts.length) accountChangeHandler(accounts);
       }
       catch(error: any) {
-        this.errorMessage = error.message;
+        errorMessage.value = error.message;
       }
-    },
+    };
 
-    accountChangeHandler(accounts: string[]): void {
-      this.account = accounts[0];
-      this.errorMessage = "";
-    },
-
-    subscribeToEvents(): void {
-      window.ethereum.on("accountsChanged", this.accountChangeHandler);
+    return {
+      account,
+      errorMessage,
+      walletOptions,
+      onConnectWallet
     }
   },
 })
