@@ -1,39 +1,36 @@
 <template>
-  <div class="card-connect">
-    <img class="logo" src="/img/metamask.svg" />
-    <div>
-      <span>MetaMask</span>
-      <span v-if="isAccountConnect"> CONNECTED</span>
-      <span v-else> NOT CONNECTED</span>
-    </div>
-    <button class="button" v-if="!isAccountConnect" @click="onConnectWallet">
-      Connect MetaMask
-    </button>
-    <div v-else>
-      Address:
-      <span>{{ account }}</span>
-    </div>
-    <div v-if="errorMessage" class="message">{{ errorMessage }}</div>
-  </div>
+  <CardConnect 
+    :walletOptions="walletOptions" 
+    :account="account" 
+    :errorMessage="errorMessage"
+    @connect="onConnectWallet" 
+  />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import CardConnect from "@/components/card-connect.vue";
 
 import Web3 from "web3";
 
-import { Wallet, CustomWindow } from "@/handlers/types";
+import { Wallet, CustomWindow } from "@/types/index";
 declare let window: CustomWindow;
 
 export default defineComponent({
+  components: { CardConnect },
+
   data(): Wallet {
     return {
-      account: '',
-      errorMessage: '',
+      account: "",
+      errorMessage: "",
       provider: null,
       web3: new Web3(
         Web3.givenProvider || "ws://some.local-or-remote.node:8546"
-      )
+      ),
+      walletOptions: {
+        name: "MetaMask",
+        logo: "/img/metamask.svg",
+      }
     }
   },
   
@@ -50,10 +47,6 @@ export default defineComponent({
 
   methods: {
     async onConnectWallet(): Promise<void> {
-      await this.detectProvider()
-    },
-
-    async detectProvider(): Promise<void> {
       try{
         if (window.ethereum) {
           this.provider = window.ethereum;

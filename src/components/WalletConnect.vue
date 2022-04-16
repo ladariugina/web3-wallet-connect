@@ -1,45 +1,36 @@
 <template>
-  <div class="card-connect">
-    <img class="logo" src="/img/wallet-connect.svg" />
-    <div>
-      <span>WalletConnect</span>
-      <span v-if="isAccountConnect"> CONNECTED</span>
-      <span v-else> NOT CONNECTED</span>
-    </div>
-    <button class="button" v-if="!isAccountConnect" @click="onConnectWallet">
-      WalletConnect
-    </button>
-    <div v-else>
-      Address:
-      <span>{{ account }}</span>
-    </div>
-    <div v-if="errorMessage" class="message">{{ errorMessage }}</div>
-  </div>
+  <CardConnect 
+    :walletOptions="walletOptions" 
+    :account="account" 
+    :errorMessage="errorMessage"
+    @connect="onConnectWallet" 
+  />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import CardConnect from "@/components/card-connect.vue";
 
 import Web3 from "web3";
 import WalletConnect from "@walletconnect/client";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 
 import { IInternalEvent } from "@walletconnect/types";
-import { Wallet } from "@/handlers/types";
+import { Wallet } from "@/types/index";
 
 export default defineComponent({
+  components: { CardConnect },
+
   data(): Wallet {
     return {
-      account: '',
-      errorMessage: '',
+      account: "",
+      errorMessage: "",
       provider: null,
       web3: null,
-    }
-  },
-
-  computed: {
-    isAccountConnect(): boolean {
-      return !!this.account;
+      walletOptions: {
+        name: "WalletConnect",
+        logo: "/img/wallet-connect.svg",
+      }
     }
   },
 
@@ -71,14 +62,7 @@ export default defineComponent({
       this.subscribeToEvents();
     },
 
-    async getAccounts(): Promise<void> {
-      await this.web3.eth.getAccounts()
-        .then((accounts: string[]) => {
-          this.accountChangeHandler(accounts[0])
-        })
-    },
-
-    async subscribeToEvents() {
+    subscribeToEvents(): void {
       if (!this.provider) return;
       if (!this.provider.connected) this.provider.createSession()
 
@@ -93,9 +77,17 @@ export default defineComponent({
         this.errorMessage = "";
       });
     },
-
-    accountChangeHandler(newAccount: string): void {
-      this.account = newAccount;
+    async getAccounts(): Promise<void> {
+      try{
+        const accounts = await this.web3.eth.getAccounts()
+        this.accountChangeHandler(accounts)
+      }
+      catch(error: any) {
+        this.errorMessage = error.message;
+      }
+    },
+    accountChangeHandler(accounts: string[]): void {
+      this.account = accounts[0];
       this.errorMessage = "";
     },
   },
