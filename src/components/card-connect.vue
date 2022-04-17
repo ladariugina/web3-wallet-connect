@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
 
 export default defineComponent({
   props: {
@@ -26,17 +26,15 @@ export default defineComponent({
     walletOptions: Object,
     errorMessage: String,
   },
+
   emits: ['connect'],
-  computed: {
-    isAccountConnect(): boolean {
-      return !!this.account;
-    }
+
+  setup(props, { emit }) {
+    const isAccountConnect = computed((): boolean => !!props.account);
+    const onConnectWallet = (): void => emit('connect');
+
+    return { isAccountConnect, onConnectWallet }
   },
-  methods: {
-    onConnectWallet() {
-      this.$emit('connect');
-    }
-  }
 })
 </script>
 
@@ -69,4 +67,8 @@ export default defineComponent({
       
   &:disabled
     opacity: .7
+
+.message
+  max-width: 400px
+  width: 100%
 </style>
