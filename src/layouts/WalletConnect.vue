@@ -14,8 +14,8 @@ import CardConnect from "@/components/card-connect.vue";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "@walletconnect/qrcode-modal";
 
-import { IInternalEvent } from "@walletconnect/types";
 import type { Ref } from "vue";
+import { IConnector, IInternalEvent, IWalletConnectOptions } from "@walletconnect/types";
 
 export default defineComponent({
   components: { CardConnect },
@@ -23,7 +23,7 @@ export default defineComponent({
   setup() {
     const account: Ref<string> = ref("");
     const errorMessage: Ref<string> = ref("");
-    const provider: Ref<WalletConnect | null> = ref(null);
+    const provider: Ref<IConnector | null> = ref(null);
     const walletOptions: { name: string, logo: string } = reactive({
       name: "WalletConnect",
       logo: "/img/wallet-connect.svg",
@@ -38,7 +38,7 @@ export default defineComponent({
       }
     });
 
-    const getSession = (): any => {
+    const getSession = (): IWalletConnectOptions => {
       const local = localStorage ? localStorage.getItem("walletconnect") : null;
       let session = null;
       if (local) session = JSON.parse(local);
@@ -78,7 +78,7 @@ export default defineComponent({
       account,
       errorMessage,
       walletOptions,
-      onConnectWallet
+      onConnectWallet,
     }
   },
 })

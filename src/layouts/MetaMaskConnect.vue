@@ -13,8 +13,8 @@ import CardConnect from "@/components/card-connect.vue";
 
 import Web3 from "web3";
 
-import { CustomWindow } from "@/types/index";
 import type { Ref } from "vue";
+import { CustomWindow } from "@/types/index";
 declare let window: CustomWindow;
 
 export default defineComponent({
