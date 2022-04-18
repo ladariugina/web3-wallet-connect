@@ -50,7 +50,7 @@ export default defineComponent({
       if (!provider.value.connected) provider.value.createSession()
 
       provider.value.on("connect", (error: Error | null, payload: IInternalEvent) => {
-        if (error) console.log(error)
+        if (error) errorMessage.value = (error as Error).message;
         accountChangeHandler(payload.params[0].accounts);
       });
 

@@ -48,8 +48,8 @@ export default defineComponent({
           });
         } else errorMessage.value = "Please install MetaMask!";
       }
-      catch(error: any) {
-        errorMessage.value = error.message;
+      catch(error: unknown) {
+        errorMessage.value = (error as Error).message;
       }
     };
 
@@ -63,8 +63,8 @@ export default defineComponent({
         const accounts = await web3.eth.getAccounts();
         if (accounts.length) accountChangeHandler(accounts);
       }
-      catch(error: any) {
-        errorMessage.value = error.message;
+      catch(error: unknown) {
+        errorMessage.value = (error as Error).message;
       }
     };
 
